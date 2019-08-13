@@ -1,3 +1,4 @@
+#include "I2CDevice.h"
 #include "MCP23017.h"
 #include <Wire.h>
 #include <usb_keyboard.h>
@@ -92,7 +93,7 @@ unsigned long millisLastKeyScan = 0;
 
 Adafruit_SSD1306 leftDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET, OLED_CS);
 Adafruit_SSD1306 rightDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-MCP23017 portExpander(MCP23017_ADDR);
+I2CDevice portExpander(MCP23017_ADDR);
 
 void setup()
 {
