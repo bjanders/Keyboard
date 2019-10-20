@@ -1,5 +1,5 @@
-#include "I2CDevice.h"
-#include "MCP23017.h"
+#include <I2CDevice.h>
+#include <MCP23017.h>
 #include <Wire.h>
 #include <usb_keyboard.h>
 #include <stdint.h>
@@ -27,7 +27,7 @@ const int OLED_DC = 14;
 const int OLED_CS = 10;
 const int OLED_RESET = 15;
 
-const int LAYERS = 4;
+const int LAYERS = 7;
 const int ROWS = 4;
 const int TOTAL_COLS = 12;
 const int COLS_PER_HAND = 6;
@@ -44,32 +44,89 @@ int colPin[] = { 4, 5, 6, 7, 8, 9 };
 #define GUI MODIFIERKEY_GUI
 #define RGUI MODIFIERKEY_RIGHT_GUI
 
-Key *keyMap[LAYERS][ROWS][TOTAL_COLS] = {
+
+typedef Key *keylayer_t[ROWS][TOTAL_COLS];
+void initKeyMap(keylayer_t *m, int layers);
+
+typedef struct {
+	char name[30];
+	keylayer_t *layers;
+	int size;
+	int layer;
+} keymap_t;
+
+keylayer_t keyMap[LAYERS] = {
+	// Layer 0
 	{
 		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new Key(RALT, KEY_Q) },
 		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new Key(RALT, KEY_P), new Key(RSHFT, 0) },
 		{ new Key(CTRL, 0),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(RCTRL, 0)},
-		{ new Key(ALT, 0),	new LayerKey(2), new LayerKey(1), new LayerKey(3), new LockLayerKey(1), new Key(CTRL, KEY_B), /**/ 	new Key(RGUI, 0), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
+		{ new Key(ALT, 0),	new LayerKey(2), new LayerKey(1), new LayerKey(3), new Key(KEY_SPACE), new LockLayerKey(4), /**/ 	new Key(RGUI, 0), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
 	},
+	// Layer 1
 	{
-		{ new DeadKey(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/ NULL, new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new DeadKey(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_W) },
+		{ new DeadKey(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/ new LockLayerKey(4), new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new DeadKey(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_W) },
 		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/ NULL, new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
 		{ NULL, new Key(KEY_INSERT), new Key(KEY_PRINTSCREEN), new Key(KEY_SCROLL_LOCK), new Key(KEY_PAUSE), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/ NULL, NULL, new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
 		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	},
+	// Layer 2
 	{
 		{ new DeadKey(KEY_TILDE), new Key(KEY_F9), new Key(KEY_F10), new Key(KEY_F11), new Key(KEY_F12), new MediaKey(KEY_MEDIA_VOLUME_INC), /**/ NULL, new Key(KEY_7), new Key(KEY_8), new Key(KEY_9), new Key(KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
 		{ NULL,	new Key(KEY_F5),new Key(KEY_F6), new Key(KEY_F7), new Key(KEY_F8), new MediaKey(KEY_MEDIA_VOLUME_DEC),	/**/ NULL, new Key(KEY_4), new Key(KEY_5), new ShiftedDeadKey(KEY_6), new Key(KEY_EQUAL), NULL },
 		{ NULL, new Key(KEY_F1), new Key(KEY_F2), new Key(KEY_F3), new Key(KEY_F4), new MediaKey(KEY_MEDIA_MUTE), /**/ NULL, new Key(KEY_1), new Key(KEY_2), new Key(KEY_3), new Key(KEY_PERIOD), NULL},
 		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	},
+	// Layer 3
 	{
 		{ new Key(KEY_NUM_LOCK), NULL, NULL, NULL, NULL, NULL, /**/ NULL, new Key(SHFT, KEY_7), new Key(SHFT, KEY_8), new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
-		{ new Key(KEY_CAPS_LOCK), NULL, NULL, NULL, NULL, NULL, /**/ NULL, new Key(SHFT, KEY_4), new Key(SHFT, KEY_5), new ShiftedDeadKey(SHFT, KEY_6), new Key(SHFT, KEY_EQUAL), NULL },
+		{ new Key(KEY_CAPS_LOCK), NULL, NULL, NULL, NULL, NULL, /**/ NULL, new Key(SHFT, KEY_4), new Key(SHFT, KEY_5), new UmlautKey(KEY_A), new Key(SHFT, KEY_EQUAL), NULL },
 		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, new Key(SHFT, KEY_1), new Key(SHFT, KEY_2), new Key(SHFT, KEY_3), new Key(KEY_PERIOD), NULL},
 		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
+	},
+
+	// Mac OS
+	// Layer 4
+	{
+		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new UmlautKey(KEY_A) },
+		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new UmlautKey(KEY_O), new Key(RSHFT, 0) },
+		{ new Key(CTRL, 0),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(RCTRL, 0)},
+		{ new Key(ALT, 0),	new LayerKey(6), new LayerKey(5), new Key(GUI, 0), new Key(KEY_SPACE), new LockLayerKey(0), /**/ 	new Key(RGUI, 0), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
+	},
+	// Layer 5
+	{
+		{ new DeadKey(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/ NULL, new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new DeadKey(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_A) },
+		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/ NULL, new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
+		{ NULL, new Key(KEY_INSERT), new Key(KEY_PRINTSCREEN), new Key(KEY_SCROLL_LOCK), new Key(KEY_PAUSE), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/ NULL, NULL, new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
+		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
+	},
+	// Layer 6
+	{
+		{ new DeadKey(KEY_TILDE), new Key(KEY_F9), new Key(KEY_F10), new Key(KEY_F11), new Key(KEY_F12), new MediaKey(KEY_MEDIA_VOLUME_INC), /**/ NULL, new Key(KEY_7), new Key(KEY_8), new Key(KEY_9), new Key(KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
+		{ NULL,	new Key(KEY_F5),new Key(KEY_F6), new Key(KEY_F7), new Key(KEY_F8), new MediaKey(KEY_MEDIA_VOLUME_DEC),	/**/ NULL, new Key(KEY_4), new Key(KEY_5), new ShiftedDeadKey(KEY_6), new Key(KEY_EQUAL), NULL },
+		{ NULL, new Key(KEY_F1), new Key(KEY_F2), new Key(KEY_F3), new Key(KEY_F4), new MediaKey(KEY_MEDIA_MUTE), /**/ NULL, new Key(KEY_1), new Key(KEY_2), new Key(KEY_3), new Key(KEY_PERIOD), NULL},
+		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	}
+	// LAYERS = 7
 };
+
+
+char *layerNames[LAYERS] = {
+	"Win",
+	"Win 1",
+	"Win 2",
+	"Win 3",
+	"Mac",
+	"Mac 1",
+	"Mac 2"
+};
+//const int NUM_KEYMAPS = 1;
+
+//keymap_t keymaps[NUM_KEYMAPS] = {
+//	{ "Windows", windowsKeymap, LAYERS, 0}
+//};
+
+int current_keymap = 0;
 
 #undef SHFT
 #undef CTRL
@@ -77,10 +134,11 @@ Key *keyMap[LAYERS][ROWS][TOTAL_COLS] = {
 #undef RALT
 
 unsigned long time = 0;
-int layer = 0;
-int keySlot = 0;
-int mediaKeySlot = 0;
+int layer = 0;			// current keyboard layer
+int keySlot;			// key slot being used 0 - 5
+int mediaKeySlot;		// media key slot being used 0 - 3
 int presses = 0;
+
 
 byte old_keyboard_keys[6] = { 0, };
 unsigned short old_keymedia_consumer_keys[4] = { 0, };
@@ -90,6 +148,7 @@ int old_layer = 0;
 unsigned long millisKeyPressed = 0;
 bool screenSaverOn = false;
 unsigned long millisLastKeyScan = 0;
+unsigned int usb_events = 0;
 
 Adafruit_SSD1306 leftDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET, OLED_CS);
 Adafruit_SSD1306 rightDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -111,10 +170,16 @@ void setup()
 		//Serial.println(F("SSD1306 allocation failed"));
 		for (;;); // Don't proceed, loop forever
 	}
-	Serial.println("Hello");
+	//Serial.println("Hello");
 	initDisplay();
 	initPins();
-	initKeyMap();
+	//initKeyMap();
+	memset(keypress_list, 0, sizeof(keypress_list));
+	initKeyMap(keyMap, LAYERS);
+	//for (int i = 0; i < NUM_KEYMAPS; i++) {
+	//	initKeyMap(keymaps[i].layers, keymaps[i].size);
+	//}
+	//initKeyMap(keyMap2);
 	renderLeftDisplay();
 	delay(100);
 }
@@ -123,10 +188,10 @@ void loop()
 {	
 	unsigned long millisNow = millis();
 	if (millisNow - millisLastKeyScan > 10) {
+		//scanKeys(millisNow, windowsKeyMap);
 		scanKeys(millisNow);
 		millisLastKeyScan = millisNow;
 		bool stateChange;
-		stateChange = memcmp(keyboard_keys, old_keyboard_keys, 6) != 0 || keyboard_modifier_keys != old_keyboard_modifier_keys;
 
 		// redraw the display if any of the following has changed:
 		// - modifier keys (shift, ctrl, alt etc.)
@@ -138,13 +203,37 @@ void loop()
 			renderDisplays();
 		}
 
-		if (stateChange) {
-			usb_keyboard_send();
-			memcpy(old_keyboard_keys, keyboard_keys, 6);
-			old_keyboard_modifier_keys = keyboard_modifier_keys;
+		//if (keypress_list_len == 0) {
+		//	keyboard_modifier_keys = 0;
+		//	for (int i = 0; i < 6; i++) {
+		//		keyboard_keys[i] = 0;
+		//	}
+		//	stateChange = memcmp(keyboard_keys, old_keyboard_keys, 6) != 0 || keyboard_modifier_keys != old_keyboard_modifier_keys;
+		//	if (stateChange) {
+		//		Serial.printf("Sending %d\n", usb_events++);
+		//		usb_keyboard_send();
+		//		memcpy(old_keyboard_keys, keyboard_keys, 6);
+
+		//		old_keyboard_modifier_keys = keyboard_modifier_keys;
+		//	}
+		//}
+		// else
+		for (int i = 0; i < keypress_list_len; i++) {
+			memcpy(keyboard_keys, keypress_list[i].keys, 6);
+			keyboard_modifier_keys = keypress_list[i].modifiers;
+			stateChange = memcmp(keyboard_keys, old_keyboard_keys, 6) != 0 || keyboard_modifier_keys != old_keyboard_modifier_keys;
+			if (stateChange) {
+				//Serial.print(keyboard_keys, HEX);
+				//Serial.printf("Sending %d\n", usb_events++);
+				printkeys();
+				usb_keyboard_send();
+				memcpy(old_keyboard_keys, keyboard_keys, 6);
+				old_keyboard_modifier_keys = keyboard_modifier_keys;
+			}
+			memset(&keypress_list[0], 0, sizeof(keypress_t));
 		}
 		if (memcmp(keymedia_consumer_keys, old_keymedia_consumer_keys, sizeof(keymedia_consumer_keys)) != 0) {
-			usb_keymedia_send();
+			//usb_keymedia_send();
 			memcpy(old_keymedia_consumer_keys, keymedia_consumer_keys, sizeof(keymedia_consumer_keys));
 		}
 	}
@@ -157,13 +246,22 @@ void loop()
 	}
 	//if (Serial.available()) {
 	//	byte serialChar = Serial.read();
-	//	resetDisplay();
-	//	display.setTextSize(2);
-	//	display.setCursor(25, 25);
+	//	//resetLeftDisplay();
+	//	leftDisplay.setTextSize(2);
+	//	leftDisplay.setCursor(25, 25);
 	//	printChar(serialChar);
 	//}
 }
 
+void printkeys()
+{
+	Serial.printf("%04x  ", keyboard_modifier_keys);
+	for (int i = 0; i < 6; i++) {
+		Serial.printf("%02x", keyboard_keys[i]);
+		Serial.print(' ');
+	}
+	Serial.println();
+}
 
 void initPins(void)
 {
@@ -175,6 +273,7 @@ void initPins(void)
 		pinMode(colPin[col], INPUT_PULLUP);
 	}
 }
+
 void initMCP23017Pins(void)
 {
 	// Set to input (the default, but to be sure)
@@ -183,7 +282,6 @@ void initMCP23017Pins(void)
 	Wire.write(0xff);
 	// Same for IODIRB, GPB7 out for display
 	Wire.write(0x7f);
-	//Wire.write(0xff);
 	Wire.endTransmission();
 	// Set pullup on A0-A6
 	Wire.beginTransmission(MCP23017_ADDR);
@@ -194,7 +292,7 @@ void initMCP23017Pins(void)
 	Wire.endTransmission();
 }
 
-// Sends a reset to the right display using the port expander
+// resetRightDisplay sends a reset to the right display using the port expander
 void resetRightDisplay(void) {
 	byte regVal = portExpander.readRegister(MCP23017_GPIOB);
 	// set high
@@ -207,27 +305,27 @@ void resetRightDisplay(void) {
 	portExpander.writeRegister(MCP23017_GPIOB, regVal | 0x80);
 }
 
-// Copies the keys from the previous lower layer if a key in the 
+// initKeyMap copies the keys from the previous lower layer if a key in the 
 // current layer is set to NULL
-void initKeyMap(void)
+void initKeyMap(keylayer_t *m, int layers)
 {
-	for (int layer = 1; layer < LAYERS; layer++) {
+	for (int layer = 1; layer < layers; layer++) {
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < TOTAL_COLS; col++) {
-				if (keyMap[layer][row][col] == NULL) {
-					keyMap[layer][row][col] = keyMap[layer - 1][row][col];
+				if (m[layer][row][col] == NULL) {
+					m[layer][row][col] = m[layer - 1][row][col];
 				}
 			}
 		}
 	}
 }
 
+//void scanKeys(unsigned long millisNow, Key *keyMap[][ROWS][TOTAL_COLS])
 void scanKeys(unsigned long millisNow)
 {
-	keyboard_modifier_keys = 0;
-	for (int i = 0; i < 6; i++) {
-		keyboard_keys[i] = 0;
-	}
+	//keymap_t *keyMap = &keymaps[current_keymap];
+	keypress_list_len = 1;
+
 	for (int i = 0; i < 4; i++) {
 		keymedia_consumer_keys[i] = 0;
 	}
@@ -352,7 +450,7 @@ void renderLeftDisplay(void) {
 	}
 	leftDisplay.setTextSize(1);
 	leftDisplay.setCursor(0, 0);
-	leftDisplay.printf("%3s %4s %3s", num, caps, scroll);
+	leftDisplay.printf("%s", layerNames[layer]);
 //	display.printf("%d", renders++);
 	leftDisplay.setCursor(0, 56);
 	//display.printf("%x", keyboard_modifier_keys);
@@ -368,7 +466,7 @@ void renderLeftDisplay(void) {
 	if (keyboard_modifier_keys & MODIFIERKEY_GUI) {
 		gui = "GUI";
 	}
-	leftDisplay.printf("%5s %4s %3s %3s L%d", shift, ctrl, alt, gui, layer);
+	leftDisplay.printf("%5s %4s %3s %3s", shift, ctrl, alt, gui);
 	leftDisplay.display();
 }
 
@@ -409,6 +507,6 @@ void renderRightDisplay(void) {
 	if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_GUI) {
 		alt = "GUI";
 	}
-	rightDisplay.printf("%5s %4s %3s %3s L%d", shift, ctrl, alt, gui, layer);
+	rightDisplay.printf("%5s %4s %3s %3s", shift, ctrl, alt, gui);
 	rightDisplay.display();
 }

@@ -1,11 +1,15 @@
 //#include <Adafruit_SSD1306.h>
 #include "Key.h"
 #include "usb_keyboard.h"
+#include "Keyboard.h"
 
 extern int keySlot;
 extern int mediaKeySlot;
 extern int layer;
-extern unsigned short keymedia_consumer_keys[4];
+//extern unsigned short keymedia_consumer_keys[4];
+
+keypress_t keypress_list[MAX_KEYPRESS_LEN];
+int keypress_list_len;
 
 //extern Adafruit_SSD1306 display;
 Key::Key() {
@@ -15,6 +19,7 @@ Key::Key() {
 	_modified = false;
 	_presscount = 0;
 }
+
 Key::Key(int key) : Key(0, key)
 {
 }
@@ -53,12 +58,26 @@ bool Key::ismodified()
 	return _modified;
 }
 
+keypress_t *Key::initkeylist()
+{
+	//if (keypress_list_len == 0) {
+	//	keypress_list_len = 1;
+	//	keypress_list[0].slot = 0;
+	//	for (int i = 0; i < 6; i++) {
+	//		keypress_list[0].keys[i] = 0;
+	//	}
+	//	keypress_list[0].modifiers = 0;
+	//}
+	return &keypress_list[keypress_list_len - 1];
+}
+
 void Key::exe()
 {
 	if (_pressed) {
-		keyboard_modifier_keys |= _mod;
-		if (keySlot < 6) {
-			keyboard_keys[keySlot++] = _key;
+		keypress_t *keypress = initkeylist();
+		keypress->modifiers |= _mod;
+		if (keypress->slot < 6 && _key != 0) {
+			keypress->keys[keypress->slot++] = _key;
 		}
 	}
 }
@@ -66,10 +85,11 @@ void Key::exe()
 void DeadKey::exe()
 {
 	if (_pressed) {
-		keyboard_modifier_keys |= _mod;
-		if (keySlot < 5) {
-			keyboard_keys[keySlot++] = _key;
-			keyboard_keys[keySlot++] = (byte)KEY_SPACE;
+		keypress_t *keypress = initkeylist();
+		keypress->modifiers |= _mod;
+		if (keySlot < 5 && _key != 0) {
+			keypress->keys[keypress->slot++] = _key;
+			keypress->keys[keypress->slot++] = (byte)KEY_SPACE;
 		}
 	}
 }
@@ -77,13 +97,36 @@ void DeadKey::exe()
 void ShiftedDeadKey::exe()
 {
 	if (_pressed) {
-		keyboard_modifier_keys |= _mod;
-		if ((keyboard_modifier_keys & MODIFIERKEY_SHIFT) && keySlot < 5) {
-			keyboard_keys[keySlot++] = _key;
-			keyboard_keys[keySlot++] = (byte)KEY_SPACE;
-		} else if (keySlot < 6) {
-			keyboard_keys[keySlot++] = _key;
+		keypress_t *keypress = initkeylist();
+		keypress->modifiers |= _mod;
+		if (_key == 0) {
+			return;
 		}
+		if ((keypress->modifiers & MODIFIERKEY_SHIFT) && keypress->slot < 5) {
+			keypress->keys[keypress->slot++] = _key;
+			keypress->keys[keypress->slot++] = (byte)KEY_SPACE;
+		} else if (keySlot < 6) {
+			keypress->keys[keypress->slot++] = _key;
+		}
+	}
+}
+
+void UmlautKey::exe()
+{
+	if (_pressed && _modified) {
+		keypress_t *keypress = initkeylist();
+		keypress->modifiers |= _mod;
+		if (_key == 0) {
+			return;
+		}
+		byte temp_modifiers = keypress->modifiers;
+		keypress->keys[0] = (byte)KEY_U;
+		keypress->modifiers = (unsigned short)MODIFIERKEY_ALT;
+		keypress_list_len++;
+		keypress = &keypress_list[keypress_list_len - 1];
+		keypress->keys[0] = _key;
+		keypress->modifiers = temp_modifiers | _mod;
+		keypress->slot = 1;
 	}
 }
 
@@ -123,9 +166,9 @@ MediaKey::MediaKey(int key) : Key(key) {}
 void MediaKey::exe()
 {
 	if (_pressed) {
-		keyboard_modifier_keys |= _mod;
-		if (keySlot < 4) {
+		if (mediaKeySlot < 4 && _key != 0) {
 			keymedia_consumer_keys[mediaKeySlot++] = _key;
 		}
 	}
 }
+
