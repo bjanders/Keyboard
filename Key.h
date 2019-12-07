@@ -15,7 +15,7 @@ const int MAX_KEYPRESS_LEN = 255;
 typedef struct {
 	byte modifiers;
 	byte keys[6];
-	byte slot;
+	byte slot;       // current index in keys array
 } keypress_t;
 
 extern keypress_t keypress_list[MAX_KEYPRESS_LEN];
@@ -30,8 +30,8 @@ public:
 	Key(int mod, int key);
 	int kc();
 	int mod();
-	void pressed(bool p);
-	bool ismodified();
+	void pressed(bool p); // sets the pressed state during scan
+	bool ismodified();    // has the state of the key changed since last scan
 	virtual void exe();
 protected:
 	keypress_t * initkeylist();
@@ -96,5 +96,17 @@ class MediaKey : public Key
 public:
 	MediaKey(int key);
 	void exe() override;
+};
+
+class KeyList
+{
+public:
+	KeyList();
+	void reset();
+	keypress_t *current_key();
+	// A list of keys sent in sequence
+	keypress_t keypress_list[MAX_KEYPRESS_LEN];
+	// number of keys in the list
+	int keypress_list_len;
 };
 #endif

@@ -27,7 +27,6 @@ const int OLED_DC = 14;
 const int OLED_CS = 10;
 const int OLED_RESET = 15;
 
-const int LAYERS = 7;
 const int ROWS = 4;
 const int TOTAL_COLS = 12;
 const int COLS_PER_HAND = 6;
@@ -48,12 +47,8 @@ int colPin[] = { 4, 5, 6, 7, 8, 9 };
 typedef Key *keylayer_t[ROWS][TOTAL_COLS];
 void initKeyMap(keylayer_t *m, int layers);
 
-typedef struct {
-	char name[30];
-	keylayer_t *layers;
-	int size;
-	int layer;
-} keymap_t;
+const int L_MAC = 3;
+const int LAYERS = 6;
 
 keylayer_t keyMap[LAYERS] = {
 	// Layer 0
@@ -61,70 +56,57 @@ keylayer_t keyMap[LAYERS] = {
 		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new Key(RALT, KEY_Q) },
 		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new Key(RALT, KEY_P), new Key(RSHFT, 0) },
 		{ new Key(CTRL, 0),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(RCTRL, 0)},
-		{ new Key(ALT, 0),	new LayerKey(2), new LayerKey(1), new LayerKey(3), new Key(KEY_SPACE), new LockLayerKey(4), /**/ 	new Key(RGUI, 0), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
+		{ new Key(ALT, 0),	new Key(GUI, 0), new LayerKey(1), new LayerKey(2), new Key(KEY_SPACE), new Key(KEY_RETURN), /**/ new LockLayerKey(L_MAC), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
 	},
 	// Layer 1
 	{
-		{ new DeadKey(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/ new LockLayerKey(4), new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new DeadKey(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_W) },
-		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/ NULL, new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
-		{ NULL, new Key(KEY_INSERT), new Key(KEY_PRINTSCREEN), new Key(KEY_SCROLL_LOCK), new Key(KEY_PAUSE), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/ NULL, NULL, new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
-		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
+		{ new DeadKey(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/ new Key(KEY_PRINTSCREEN), new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new DeadKey(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_W) },
+		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/	                      new Key(KEY_SCROLL_LOCK), new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
+		{ NULL, new Key(KEY_INSERT), NULL, new Key(KEY_CAPS_LOCK), NULL, new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/                             new Key(KEY_PAUSE), NULL, new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
+		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/                                                                                            NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	},
 	// Layer 2
 	{
-		{ new DeadKey(KEY_TILDE), new Key(KEY_F9), new Key(KEY_F10), new Key(KEY_F11), new Key(KEY_F12), new MediaKey(KEY_MEDIA_VOLUME_INC), /**/ NULL, new Key(KEY_7), new Key(KEY_8), new Key(KEY_9), new Key(KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
-		{ NULL,	new Key(KEY_F5),new Key(KEY_F6), new Key(KEY_F7), new Key(KEY_F8), new MediaKey(KEY_MEDIA_VOLUME_DEC),	/**/ NULL, new Key(KEY_4), new Key(KEY_5), new ShiftedDeadKey(KEY_6), new Key(KEY_EQUAL), NULL },
-		{ NULL, new Key(KEY_F1), new Key(KEY_F2), new Key(KEY_F3), new Key(KEY_F4), new MediaKey(KEY_MEDIA_MUTE), /**/ NULL, new Key(KEY_1), new Key(KEY_2), new Key(KEY_3), new Key(KEY_PERIOD), NULL},
-		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
-	},
-	// Layer 3
-	{
-		{ new Key(KEY_NUM_LOCK), NULL, NULL, NULL, NULL, NULL, /**/ NULL, new Key(SHFT, KEY_7), new Key(SHFT, KEY_8), new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
-		{ new Key(KEY_CAPS_LOCK), NULL, NULL, NULL, NULL, NULL, /**/ NULL, new Key(SHFT, KEY_4), new Key(SHFT, KEY_5), new UmlautKey(KEY_A), new Key(SHFT, KEY_EQUAL), NULL },
-		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, new Key(SHFT, KEY_1), new Key(SHFT, KEY_2), new Key(SHFT, KEY_3), new Key(KEY_PERIOD), NULL},
-		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
+		{ new DeadKey(KEY_TILDE), new Key(KEY_F9), new Key(KEY_F10), new Key(KEY_F11), new Key(KEY_F12), new MediaKey(KEY_MEDIA_VOLUME_INC), /**/ new Key(SHFT, KEY_8), new Key(KEY_7), new Key(KEY_8), new Key(KEY_9), new Key(KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
+		{ NULL,	new Key(KEY_F5),new Key(KEY_F6), new Key(KEY_F7), new Key(KEY_F8), new MediaKey(KEY_MEDIA_VOLUME_DEC),	/**/                      new Key(KEY_MINUS), new Key(KEY_4), new Key(KEY_5), new ShiftedDeadKey(KEY_6), new Key(KEY_EQUAL), NULL },
+		{ NULL, new Key(KEY_F1), new Key(KEY_F2), new Key(KEY_F3), new Key(KEY_F4), new MediaKey(KEY_MEDIA_MUTE), /**/                            new Key(SHFT, KEY_EQUAL), new Key(KEY_1), new Key(KEY_2), new Key(KEY_3), new Key(KEY_PERIOD), NULL},
+		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/                                                                                                NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	},
 
 	// Mac OS
-	// Layer 4
+	// Layer 3 = L_MAC
 	{
 		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new UmlautKey(KEY_A) },
 		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new UmlautKey(KEY_O), new Key(RSHFT, 0) },
 		{ new Key(CTRL, 0),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(RCTRL, 0)},
-		{ new Key(ALT, 0),	new LayerKey(6), new LayerKey(5), new Key(GUI, 0), new Key(KEY_SPACE), new LockLayerKey(0), /**/ 	new Key(RGUI, 0), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
+		{ new Key(ALT, 0),	new Key(GUI, 0), new LayerKey(L_MAC + 1), new LayerKey(L_MAC + 2), new Key(KEY_SPACE), new Key(KEY_RETURN), /**/ 	 new LockLayerKey(0),  new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
 	},
-	// Layer 5
+	// Layer 4 (L_MAC + 1)
 	{
-		{ new DeadKey(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/ NULL, new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new DeadKey(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_A) },
-		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/ NULL, new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
+		{ new Key(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/             NULL, new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new Key(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_A) },
+		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/                               NULL, new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
 		{ NULL, new Key(KEY_INSERT), new Key(KEY_PRINTSCREEN), new Key(KEY_SCROLL_LOCK), new Key(KEY_PAUSE), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/ NULL, NULL, new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
-		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
+		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/                                                                                                    NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	},
-	// Layer 6
+	// Layer 5 (L_MAC + 2)
 	{
-		{ new DeadKey(KEY_TILDE), new Key(KEY_F9), new Key(KEY_F10), new Key(KEY_F11), new Key(KEY_F12), new MediaKey(KEY_MEDIA_VOLUME_INC), /**/ NULL, new Key(KEY_7), new Key(KEY_8), new Key(KEY_9), new Key(KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
-		{ NULL,	new Key(KEY_F5),new Key(KEY_F6), new Key(KEY_F7), new Key(KEY_F8), new MediaKey(KEY_MEDIA_VOLUME_DEC),	/**/ NULL, new Key(KEY_4), new Key(KEY_5), new ShiftedDeadKey(KEY_6), new Key(KEY_EQUAL), NULL },
-		{ NULL, new Key(KEY_F1), new Key(KEY_F2), new Key(KEY_F3), new Key(KEY_F4), new MediaKey(KEY_MEDIA_MUTE), /**/ NULL, new Key(KEY_1), new Key(KEY_2), new Key(KEY_3), new Key(KEY_PERIOD), NULL},
-		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/ NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
+		{ new Key(KEY_TILDE), new Key(KEY_F9), new Key(KEY_F10), new Key(KEY_F11), new Key(KEY_F12), new MediaKey(KEY_MEDIA_VOLUME_INC), /**/ NULL, new Key(KEY_7), new Key(KEY_8), new Key(KEY_9), new Key(KEY_0), new Key(CTRL | ALT, KEY_DELETE) },
+		{ NULL,	new Key(KEY_F5),new Key(KEY_F6), new Key(KEY_F7), new Key(KEY_F8), new MediaKey(KEY_MEDIA_VOLUME_DEC),	/**/                  NULL, new Key(KEY_4), new Key(KEY_5), new Key(KEY_6), new Key(KEY_EQUAL), NULL },
+		{ NULL, new Key(KEY_F1), new Key(KEY_F2), new Key(KEY_F3), new Key(KEY_F4), new MediaKey(KEY_MEDIA_MUTE), /**/                        NULL, new Key(KEY_1), new Key(KEY_2), new Key(KEY_3), new Key(KEY_PERIOD), NULL},
+		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/                                                                                            NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	}
-	// LAYERS = 7
+	// LAYERS = 6
 };
 
 
-char *layerNames[LAYERS] = {
+const char *layerNames[LAYERS] = {
 	"Win",
 	"Win 1",
 	"Win 2",
-	"Win 3",
 	"Mac",
 	"Mac 1",
 	"Mac 2"
 };
-//const int NUM_KEYMAPS = 1;
-
-//keymap_t keymaps[NUM_KEYMAPS] = {
-//	{ "Windows", windowsKeymap, LAYERS, 0}
-//};
 
 int current_keymap = 0;
 
@@ -135,8 +117,9 @@ int current_keymap = 0;
 
 unsigned long time = 0;
 int layer = 0;			// current keyboard layer
-int keySlot;			// key slot being used 0 - 5
-int mediaKeySlot;		// media key slot being used 0 - 3
+extern KeyList key_list;
+extern int keySlot;			// key slot being used 0 - 5
+extern int mediaKeySlot;		// media key slot being used 0 - 3
 int presses = 0;
 
 
@@ -170,22 +153,15 @@ void setup()
 		//Serial.println(F("SSD1306 allocation failed"));
 		for (;;); // Don't proceed, loop forever
 	}
-	//Serial.println("Hello");
 	initDisplay();
 	initPins();
-	//initKeyMap();
-	memset(keypress_list, 0, sizeof(keypress_list));
 	initKeyMap(keyMap, LAYERS);
-	//for (int i = 0; i < NUM_KEYMAPS; i++) {
-	//	initKeyMap(keymaps[i].layers, keymaps[i].size);
-	//}
-	//initKeyMap(keyMap2);
 	renderLeftDisplay();
 	delay(100);
 }
 
 void loop()
-{	
+{
 	unsigned long millisNow = millis();
 	if (millisNow - millisLastKeyScan > 10) {
 		//scanKeys(millisNow, windowsKeyMap);
@@ -197,45 +173,32 @@ void loop()
 		// - modifier keys (shift, ctrl, alt etc.)
 		// - keyboard leds (num lock, caps lock, scroll lock)
 		// - keyboard layer
-		if (keyboard_modifier_keys != old_keyboard_modifier_keys || layer != old_layer || keyboard_leds != old_keyboard_leds) {
+
+		// loop through the list of keys to send
+		for (int i = 0; i < key_list.keypress_list_len; i++) {
+			// keyboard_keys and keyboard_modifier_keys are defined in usb_keyboard.h
+			memcpy(keyboard_keys, key_list.keypress_list[i].keys, 6);
+			keyboard_modifier_keys = key_list.keypress_list[i].modifiers;
+			stateChange = memcmp(keyboard_keys, old_keyboard_keys, 6) != 0 || keyboard_modifier_keys != old_keyboard_modifier_keys;
+			if (stateChange) {
+				//Serial.printf("Sending %d\n", usb_events++);
+				printkeys();
+				// send keys that are in keyboard_keys and keyboard_modifier_keys
+				usb_keyboard_send();
+				memcpy(old_keyboard_keys, keyboard_keys, 6);
+				old_keyboard_modifier_keys = keyboard_modifier_keys;
+			}
+		}
+		if (memcmp(keymedia_consumer_keys, old_keymedia_consumer_keys, sizeof(keymedia_consumer_keys)) != 0) {
+			usb_keymedia_send();
+			memcpy(old_keymedia_consumer_keys, keymedia_consumer_keys, sizeof(keymedia_consumer_keys));
+		}
+		if (layer != old_layer || keyboard_leds != old_keyboard_leds) {
 			old_layer = layer;
 			old_keyboard_leds = keyboard_leds;
 			renderDisplays();
 		}
 
-		//if (keypress_list_len == 0) {
-		//	keyboard_modifier_keys = 0;
-		//	for (int i = 0; i < 6; i++) {
-		//		keyboard_keys[i] = 0;
-		//	}
-		//	stateChange = memcmp(keyboard_keys, old_keyboard_keys, 6) != 0 || keyboard_modifier_keys != old_keyboard_modifier_keys;
-		//	if (stateChange) {
-		//		Serial.printf("Sending %d\n", usb_events++);
-		//		usb_keyboard_send();
-		//		memcpy(old_keyboard_keys, keyboard_keys, 6);
-
-		//		old_keyboard_modifier_keys = keyboard_modifier_keys;
-		//	}
-		//}
-		// else
-		for (int i = 0; i < keypress_list_len; i++) {
-			memcpy(keyboard_keys, keypress_list[i].keys, 6);
-			keyboard_modifier_keys = keypress_list[i].modifiers;
-			stateChange = memcmp(keyboard_keys, old_keyboard_keys, 6) != 0 || keyboard_modifier_keys != old_keyboard_modifier_keys;
-			if (stateChange) {
-				//Serial.print(keyboard_keys, HEX);
-				//Serial.printf("Sending %d\n", usb_events++);
-				printkeys();
-				usb_keyboard_send();
-				memcpy(old_keyboard_keys, keyboard_keys, 6);
-				old_keyboard_modifier_keys = keyboard_modifier_keys;
-			}
-			memset(&keypress_list[0], 0, sizeof(keypress_t));
-		}
-		if (memcmp(keymedia_consumer_keys, old_keymedia_consumer_keys, sizeof(keymedia_consumer_keys)) != 0) {
-			//usb_keymedia_send();
-			memcpy(old_keymedia_consumer_keys, keymedia_consumer_keys, sizeof(keymedia_consumer_keys));
-		}
 	}
 	if (millisNow - millisKeyPressed > SCREENSAVER_MILLIS) {
 		clearDisplays();
@@ -255,7 +218,7 @@ void loop()
 
 void printkeys()
 {
-	Serial.printf("%04x  ", keyboard_modifier_keys);
+	Serial.printf("%d %04x  ", layer, keyboard_modifier_keys);
 	for (int i = 0; i < 6; i++) {
 		Serial.printf("%02x", keyboard_keys[i]);
 		Serial.print(' ');
@@ -312,7 +275,7 @@ void initKeyMap(keylayer_t *m, int layers)
 	for (int layer = 1; layer < layers; layer++) {
 		for (int row = 0; row < ROWS; row++) {
 			for (int col = 0; col < TOTAL_COLS; col++) {
-				if (m[layer][row][col] == NULL) {
+				if (m[layer][row][col] == NULL && layer > 0) {
 					m[layer][row][col] = m[layer - 1][row][col];
 				}
 			}
@@ -323,14 +286,12 @@ void initKeyMap(keylayer_t *m, int layers)
 //void scanKeys(unsigned long millisNow, Key *keyMap[][ROWS][TOTAL_COLS])
 void scanKeys(unsigned long millisNow)
 {
-	//keymap_t *keyMap = &keymaps[current_keymap];
-	keypress_list_len = 1;
+	key_list.reset();
 
 	for (int i = 0; i < 4; i++) {
 		keymedia_consumer_keys[i] = 0;
 	}
 	mediaKeySlot = 0;
-	keySlot = 0;
 
 	// Left hand on Teensy
 	for (int row = 0; row < ROWS; row++) {
@@ -342,6 +303,7 @@ void scanKeys(unsigned long millisNow)
 			bool isPressed;
 			val = digitalRead(colPin[col]);
 			key = keyMap[layer][row][col];
+			if (key == NULL) continue;
 			isPressed = val == LOW;
 			key->pressed(isPressed);
 			key->exe();
@@ -373,6 +335,7 @@ void scanKeys(unsigned long millisNow)
 		for (int col = 0; col < COLS_PER_HAND; col++) {
 			bool isPressed;
 			key = keyMap[layer][row][col+COLS_PER_HAND];
+			if (key == NULL) continue;
 			isPressed = (colStat & (1 << col)) == 0;
 			key->pressed(isPressed);
 			key->exe();
@@ -430,43 +393,42 @@ void renderDisplays(void) {
 }
 
 void renderLeftDisplay(void) {
-	const char *num = "";
-	const char *caps = "";
-	const char *scroll = "";
-	const char *shift = "";
-	const char *alt = "";
-	const char *ctrl = "";
-	const char *gui = "";
+	//const char *num = "";
+	//const char *caps = "";
+	//const char *scroll = "";
+	//const char *shift = "";
+	//const char *alt = "";
+	//const char *ctrl = "";
+	//const char *gui = "";
 
 	leftDisplay.clearDisplay();
-	if (keyboard_leds & (1 << USB_LED_NUM_LOCK)) {
-		num = "NUM";
-	}
-	if (keyboard_leds & (1 << USB_LED_CAPS_LOCK)) {
-		caps = "CAPS";
-	}
-	if (keyboard_leds & (1 << USB_LED_SCROLL_LOCK)) {
-		scroll = "SCROLL";
-	}
+	//if (keyboard_leds & (1 << USB_LED_NUM_LOCK)) {
+	//	num = "NUM";
+	//}
+	//if (keyboard_leds & (1 << USB_LED_CAPS_LOCK)) {
+	//	caps = "CAPS";
+	//}
+	//if (keyboard_leds & (1 << USB_LED_SCROLL_LOCK)) {
+	//	scroll = "SCROLL";
+	//}
 	leftDisplay.setTextSize(1);
 	leftDisplay.setCursor(0, 0);
 	leftDisplay.printf("%s", layerNames[layer]);
 //	display.printf("%d", renders++);
-	leftDisplay.setCursor(0, 56);
-	//display.printf("%x", keyboard_modifier_keys);
-	if (keyboard_modifier_keys & MODIFIERKEY_SHIFT) {
-		shift = "SHIFT";
-	}
-	if (keyboard_modifier_keys & MODIFIERKEY_CTRL) {
-		ctrl = "CTRL";
-	}
-	if (keyboard_modifier_keys & MODIFIERKEY_ALT) {
-		alt = "ALT";
-	}
-	if (keyboard_modifier_keys & MODIFIERKEY_GUI) {
-		gui = "GUI";
-	}
-	leftDisplay.printf("%5s %4s %3s %3s", shift, ctrl, alt, gui);
+	//leftDisplay.setCursor(0, 56);
+	//if (keyboard_modifier_keys & MODIFIERKEY_SHIFT) {
+	//	shift = "SHIFT";
+	//}
+	//if (keyboard_modifier_keys & MODIFIERKEY_CTRL) {
+	//	ctrl = "CTRL";
+	//}
+	//if (keyboard_modifier_keys & MODIFIERKEY_ALT) {
+	//	alt = "ALT";
+	//}
+	//if (keyboard_modifier_keys & MODIFIERKEY_GUI) {
+	//	gui = "GUI";
+	//}
+	//leftDisplay.printf("%5s %4s %3s %3s", shift, ctrl, alt, gui);
 	leftDisplay.display();
 }
 
@@ -474,10 +436,10 @@ void renderRightDisplay(void) {
 	const char *num = "";
 	const char *caps = "";
 	const char *scroll = "";
-	const char *shift = "";
-	const char *alt = "";
-	const char *ctrl = "";
-	const char *gui = "";
+	//const char *shift = "";
+	//const char *alt = "";
+	//const char *ctrl = "";
+	//const char *gui = "";
 
 	rightDisplay.clearDisplay();
 	if (keyboard_leds & (1 << USB_LED_NUM_LOCK)) {
@@ -494,19 +456,18 @@ void renderRightDisplay(void) {
 	rightDisplay.printf("%3s %4s %3s", num, caps, scroll);
 	//	display.printf("%d", renders++);
 	rightDisplay.setCursor(0, 56);
-	//display.printf("%x", keyboard_modifier_keys);
-	if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_SHIFT) {
-		shift = "SHIFT";
-	}
-	if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_CTRL) {
-		ctrl = "CTRL";
-	}
-	if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_ALT) {
-		alt = "ALT";
-	}
-	if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_GUI) {
-		alt = "GUI";
-	}
-	rightDisplay.printf("%5s %4s %3s %3s", shift, ctrl, alt, gui);
+	//if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_SHIFT) {
+	//	shift = "SHIFT";
+	//}
+	//if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_CTRL) {
+	//	ctrl = "CTRL";
+	//}
+	//if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_ALT) {
+	//	alt = "ALT";
+	//}
+	//if (keyboard_modifier_keys & MODIFIERKEY_RIGHT_GUI) {
+	//	alt = "GUI";
+	//}
+	//rightDisplay.printf("%5s %4s %3s %3s", shift, ctrl, alt, gui);
 	rightDisplay.display();
 }
