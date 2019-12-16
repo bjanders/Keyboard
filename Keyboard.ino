@@ -6,12 +6,13 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
-#include "Key.h"
 #include "Bitmap.h"
+#include "Key.h"
+#include "Layer.h"
 
 // Configurable items
 
-const unsigned long SCREENSAVER_MILLIS = 30 * 60 * 1000;
+constexpr unsigned long SCREENSAVER_MILLIS = 30 * 60 * 1000;
 
 // Other constants
 
@@ -21,16 +22,16 @@ constexpr auto USB_LED_SCROLL_LOCK = 2;
 constexpr auto USB_LED_COMPOSE = 3;
 constexpr auto USB_LED_KANA = 4;
 
-const int SCREEN_WIDTH = 128; // OLED display width, in pixels
-const int SCREEN_HEIGHT = 64; // OLED display height, in pixels
+constexpr int SCREEN_WIDTH = 128; // OLED display width, in pixels
+constexpr int SCREEN_HEIGHT = 64; // OLED display height, in pixels
 
-const int OLED_DC = 14;
-const int OLED_CS = 10;
-const int OLED_RESET = 15;
+constexpr int OLED_DC = 14;
+constexpr int OLED_CS = 10;
+constexpr int OLED_RESET = 15;
 
 
-int rowPin[] = { 0, 1, 2, 3 };
-int colPin[] = { 4, 5, 6, 7, 8, 9 };
+constexpr int rowPin[] = { 0, 1, 2, 3 };
+constexpr int colPin[] = { 4, 5, 6, 7, 8, 9 };
 
 #define SHFT MODIFIERKEY_SHIFT
 #define RSHFT MODIFIERKEY_RIGHT_SHIFT
@@ -44,12 +45,12 @@ int colPin[] = { 4, 5, 6, 7, 8, 9 };
 
 void initKeyMap(keylayer_t *m, int layers);
 
-const int L_WIN = 0;
-const int L_MAC = 3;
-const int L_GAMING = 6;
-const int L_PHOTOSHOP = 7;
-const int LAYERS = 10;
-const int L_SELECT = LAYERS - 1;
+constexpr int LAYERS = 10;
+constexpr int L_WIN = 0;
+constexpr int L_MAC = 3;
+constexpr int L_GAMING = 6;
+constexpr int L_PHOTOSHOP = 7;
+constexpr int L_SELECT = LAYERS - 1;
 
 keylayer_t keyMap[LAYERS] = {
 	// Layer 0
@@ -316,7 +317,6 @@ void initKeyMap(keylayer_t *m, int layers)
 	}
 }
 
-//void scanKeys(unsigned long millisNow, Key *keyMap[][ROWS][TOTAL_COLS])
 void scanKeys(unsigned long millisNow)
 {
 	key_list.reset();

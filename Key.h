@@ -1,23 +1,15 @@
-// Key.h
+#pragma once
 
-#ifndef _KEY_h
-#define _KEY_h
-
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
-#else
-	#include "WProgram.h"
-#endif
-
+#include <arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
 
-const int MAX_KEYPRESS_LEN = 255;
+constexpr int MAX_KEYPRESS_LEN = 255;
 
-const int ROWS = 4;
-const int TOTAL_COLS = 12;
-const int COLS_PER_HAND = 6;
+constexpr int ROWS = 4;
+constexpr int TOTAL_COLS = 12;
+constexpr int COLS_PER_HAND = 6;
 
 
 typedef struct {
@@ -139,5 +131,3 @@ public:
 };
 
 typedef Key *keylayer_t[ROWS][TOTAL_COLS];
-
-#endif

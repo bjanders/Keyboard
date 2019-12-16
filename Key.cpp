@@ -12,27 +12,22 @@ extern Adafruit_SSD1306 leftDisplay;
 KeyList key_list;
 
 //extern Adafruit_SSD1306 display;
-Key::Key() : 
-	modifiers {},
-	keyCode{},
-	_pressed{false},
-	modified{false},
-	pressCount{0}
-{
-	memset(_bitmap, 0, sizeof(_bitmap));
-	memset(_text, 0, sizeof(_text));
-}
+Key::Key(int mod, int key) :
+	_bitmap{ 0 },
+	_text{ 0 },
+	modifiers{ mod },
+	keyCode{ key },
+	bounce{ 0 },
+	_pressed{ false },
+	modified{ false },
+	pressCount{ 0 }
+{ }
+
+Key::Key() : Key(0, 0)
+{ }
 
 Key::Key(int key) : Key(0, key)
-{
-}
-
-Key::Key(int mod, int key) : Key()
-{
-	modifiers = mod;
-	keyCode = key;
-}
-
+{ }
 
 Key::Key(int mod, int key, const uint8_t *bitmap) : Key(mod, key)
 {
@@ -81,7 +76,7 @@ void Key::setBitmap(uint8_t mod, const uint8_t *bitmap)
 
 void Key::setText(uint8_t mod, const char *text)
 {
-	if (mod < 8?) {
+	if (mod < 8) {
 		_text[mod] = text;
 	}
 }
