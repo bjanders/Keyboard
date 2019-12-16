@@ -129,5 +129,3 @@ public:
 	// number of keys in the list
 	int keypressListLen;
 };
-
-typedef Key *keylayer_t[ROWS][TOTAL_COLS];
