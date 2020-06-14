@@ -12,5 +12,5 @@ const int MAX_LAYER_NAME_LEN{ 20 };
 
 struct Layer {
 	const char name[MAX_LAYER_NAME_LEN];
-	Key *keys[ROWS][TOTAL_COLS];
+	Key* keys[ROWS][TOTAL_COLS];
 };

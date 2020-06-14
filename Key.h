@@ -27,21 +27,21 @@ public:
 	Key(int mod, int key);
 	Key(int mod, int key, const uint8_t *bitmap);
 	Key(int key, const uint8_t *bitmap);
-	int KeyCode();
-	int Modifiers();
-	void pressed(bool p); // sets the pressed state during scan
-	bool isModified();    // has the state of the key changed since last scan
-	virtual void render(Adafruit_SSD1306 *display, int x, int y);
+	int KeyCode() const { return keyCode; }
+	int Modifiers() const { return modifiers; }
+	void setPressed(bool p); // sets the pressed state during scan
+	bool isModified() const { return modified; }    // has the state of the key changed since last scan
+	virtual void render(Adafruit_SSD1306 *display, int x, int y) const;
 	virtual void exe();
 	void setBitmap(uint8_t mod, const uint8_t *bitmap);
 	void setText(uint8_t mod, const char *text);
 protected:
-	const uint8_t *_bitmap[8];   // bitmaps for key
-	const char *_text[8];		// text for key
+	const uint8_t *bitmaps[8];   // bitmaps for key
+	const char *texts[8];		// text for key
 	int modifiers;			// modifiers pressed
 	int keyCode;			// key code
 	int bounce;		// debounce time out, not currently used
-	bool _pressed;		// is the key being pressed (after debouncing)
+	bool pressed;		// is the key being pressed (after debouncing)
 	bool modified;		// has the state of the key changed since last scan
 	int pressCount;	// how many times has the key been pressed, for statistics & debugging
 };
@@ -80,7 +80,7 @@ class LayerKey : public Key
 public:
 	LayerKey(int layer);
 	void exe() override;
-	void render(Adafruit_SSD1306 *display, int x, int y) override;
+	void render(Adafruit_SSD1306 *display, int x, int y) const override;
 protected:
 	int _layer;
 	int oldLayer;
@@ -114,7 +114,7 @@ class MediaKey : public Key
 public:
 	MediaKey(int key);
 	void exe() override;
-	void render(Adafruit_SSD1306 *display, int x, int y) override;
+	void render(Adafruit_SSD1306 *display, int x, int y) const override;
 };
 
 

@@ -59,7 +59,7 @@ Layer layers[LAYERS] = {
 		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new Key(RALT, KEY_Q) },
 		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new Key(RALT, KEY_P), new Key(RSHFT, 0) },
 		{ new Key(CTRL, 0),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(RCTRL, 0)},
-		{ new Key(ALT, 0),	new LayerKey(2), new LayerKey(1), new Key(GUI, 0), new Key(KEY_SPACE), new Key(KEY_RETURN), /**/ new SelectLayerKey(L_SELECT), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
+		{ new Key(ALT, 0),	new LayerKey(2), new LayerKey(1), new Key(GUI, 0), new Key(KEY_SPACE), new SelectLayerKey(L_SELECT), /**/ new SelectLayerKey(L_SELECT), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
 	},
 	// Layer 1
 	"Windows US-Intl 1",
@@ -85,7 +85,7 @@ Layer layers[LAYERS] = {
 		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new UmlautKey(KEY_A) },
 		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new UmlautKey(KEY_O), new Key(RSHFT, 0) },
 		{ new Key(GUI, 0, command),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(GUI, 0, command)},
-		{ new Key(ALT, 0, mac_opt),	new LayerKey(L_MAC + 2), new LayerKey(L_MAC + 1), new Key(CTRL, 0), new Key(KEY_SPACE), new Key(KEY_RETURN), /**/ 	 new SelectLayerKey(L_SELECT),  new NoKey(),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(RCTRL, 0), new Key(ALT, 0, mac_opt) }
+		{ new Key(ALT, 0, mac_opt),	new LayerKey(L_MAC + 2), new LayerKey(L_MAC + 1), new Key(CTRL, 0), new Key(KEY_SPACE), new SelectLayerKey(L_SELECT), /**/ 	 new SelectLayerKey(L_SELECT),  new NoKey(),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(RCTRL, 0), new Key(ALT, 0, mac_opt) }
 	},
 	// Layer 4 (L_MAC + 1)
 	"Mac 1",
@@ -189,6 +189,11 @@ void setup()
 	initKeyMap(layers, LAYERS);
 	renderLeftDisplay();
 	delay(100);
+	memset(keyboard_keys, 0, sizeof(keyboard_keys));
+	memset(keymedia_consumer_keys, 0, sizeof(keymedia_consumer_keys));
+	keyboard_modifier_keys = 0;
+	usb_keyboard_send();
+	usb_keymedia_send();
 }
 
 void loop()
@@ -239,14 +244,15 @@ void loop()
 		renderDisplays();
 		screenSaverOn = false;
 	}
-	//if (Serial.available()) {
-	//	byte serialChar = Serial.read();
-	//	//resetLeftDisplay();
-	//	leftDisplay.setTextSize(2);
-	//	leftDisplay.setCursor(25, 25);
-	//	printChar(serialChar);
-	//}
 }
+
+//void serialEvent() {
+//	uint8_t serialChar = Serial.read();
+//	leftDisplay.setTextSize(2);
+//	leftDisplay.setCursor(25, 25);
+//	leftDisplay.write(serialChar);
+//	leftDisplay.display();
+//}
 
 void printkeys()
 {
@@ -336,7 +342,7 @@ void scanKeys(unsigned long millisNow)
 			key = layers[layer].keys[row][col];
 			if (key == NULL) continue;
 			isPressed = val == LOW;
-			key->pressed(isPressed);
+			key->setPressed(isPressed);
 			key->exe();
 			if (isPressed) {
 				millisKeyPressed = millisNow;
@@ -368,7 +374,7 @@ void scanKeys(unsigned long millisNow)
 			key = layers[layer].keys[row][col+COLS_PER_HAND];
 			if (key == NULL) continue;
 			isPressed = (colStat & (1 << col)) == 0;
-			key->pressed(isPressed);
+			key->setPressed(isPressed);
 			key->exe();
 			if (isPressed) {
 				millisKeyPressed = millisNow;

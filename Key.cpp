@@ -10,14 +10,13 @@ extern int layer;
 extern Adafruit_SSD1306 leftDisplay;
 KeyList keyList;
 
-//extern Adafruit_SSD1306 display;
 Key::Key(int mod, int key) :
-	_bitmap{ 0 },
-	_text{ 0 },
+	bitmaps{ 0 },
+	texts{ 0 },
 	modifiers{ mod },
 	keyCode{ key },
 	bounce{ 0 },
-	_pressed{ false },
+	pressed{ false },
 	modified{ false },
 	pressCount{ 0 }
 { }
@@ -30,29 +29,19 @@ Key::Key(int key) : Key(0, key)
 
 Key::Key(int mod, int key, const uint8_t *bitmap) : Key(mod, key)
 {
-	_bitmap[0] = bitmap;
+	bitmaps[0] = bitmap;
 }
 
 Key::Key(int key, const uint8_t *bitmap) : Key(0, key)
 {
-	_bitmap[0] = bitmap;
+	bitmaps[0] = bitmap;
 }
 
-int Key::KeyCode()
+void Key::setPressed(bool p)
 {
-	return keyCode;
-}
-
-int Key::Modifiers()
-{
-	return modifiers;
-}
-
-void Key::pressed(bool p)
-{
-	if (p != _pressed) {
+	if (p != pressed) {
 		modified = true;
-		_pressed = p;
+		pressed = p;
 		if (p) {
 			pressCount++;
 		}
@@ -61,22 +50,17 @@ void Key::pressed(bool p)
 	}
 }
 
-bool Key::isModified()
-{
-	return modified;
-}
-
 void Key::setBitmap(uint8_t mod, const uint8_t *bitmap)
 {
 	if (mod < 8) {
-		_bitmap[mod] = bitmap;
+		bitmaps[mod] = bitmap;
 	}
 }
 
 void Key::setText(uint8_t mod, const char *text)
 {
 	if (mod < 8) {
-		_text[mod] = text;
+		texts[mod] = text;
 	}
 }
 
@@ -84,15 +68,15 @@ void Key::setText(uint8_t mod, const char *text)
 // render should render the key text or symbol starting
 // from the top left corner x,y. The rendering area is 
 // 20*13 pixel icons or max 3 chars (18 * 8 pixels)
-void Key::render(Adafruit_SSD1306 *display, int x, int y)
+void Key::render(Adafruit_SSD1306 *display, int x, int y) const
 {
 	const char *str = NULL;
 	const uint8_t *bitmap = NULL;
 
-	if (_bitmap[0] != NULL) {
-		bitmap = _bitmap[0];
-	}  else if (_text[0] != NULL) {
-		str = _text[0];
+	if (bitmaps[0] != NULL) {
+		bitmap = bitmaps[0];
+	}  else if (texts[0] != NULL) {
+		str = texts[0];
 	} else {
 		switch (keyCode) {
 		case KEY_A: str = "A"; break;
@@ -256,7 +240,7 @@ void Key::render(Adafruit_SSD1306 *display, int x, int y)
 
 void Key::exe()
 {
-	if (_pressed) {
+	if (pressed) {
 		keypress_t *keypress = keyList.currentKey();
 		keypress->modifiers |= modifiers;
 		if (keypress->keyIndex < 6 && keyCode != 0) {
@@ -267,7 +251,7 @@ void Key::exe()
 
 void DeadKey::exe()
 {
-	if (_pressed) {
+	if (pressed) {
 		keypress_t *keypress = keyList.currentKey();
 		keypress->modifiers |= modifiers;
 		if (keypress->keyIndex < 5 && keyCode != 0) {
@@ -279,7 +263,7 @@ void DeadKey::exe()
 
 void ShiftedDeadKey::exe()
 {
-	if (_pressed) {
+	if (pressed) {
 		keypress_t *keypress = keyList.currentKey();
 		keypress->modifiers |= modifiers;
 		if (keyCode == 0) {
@@ -296,7 +280,7 @@ void ShiftedDeadKey::exe()
 
 void UmlautKey::exe()
 {
-	if (_pressed && modified) {
+	if (pressed && modified) {
 		keypress_t *keypress = keyList.currentKey();
 		keypress->modifiers |= modifiers;
 		if (keyCode == 0) {
@@ -322,7 +306,7 @@ LayerKey::LayerKey(int layer) :
  
 void LayerKey::exe()
 {	if (modified) {
-		if (_pressed) {
+		if (pressed) {
 			Serial.printf("Layer change %d -> %d\n", layer, _layer);
 			oldLayer = layer;
 			layer = _layer;
@@ -333,7 +317,7 @@ void LayerKey::exe()
 	}
 }
 
-void LayerKey::render(Adafruit_SSD1306 *display, int x, int y)
+void LayerKey::render(Adafruit_SSD1306 *display, int x, int y) const
 {
 	display->setCursor(x + 4, y + 3);
 	display->printf("L%d", _layer);		
@@ -342,7 +326,7 @@ void LayerKey::render(Adafruit_SSD1306 *display, int x, int y)
 
 void LockLayerKey::exe() 
 {
-	if (modified && !_pressed) {
+	if (modified && !pressed) {
 		layer = _layer;
 		Serial.println(layer);
 //		leftDisplay.fillRect(0, 8, 128, 64 - 8, BLACK);
@@ -353,7 +337,7 @@ void LockLayerKey::exe()
 void SelectLayerKey::exe()
 {
 	LockLayerKey::exe();
-	if (modified && !_pressed) {
+	if (modified && !pressed) {
 		Serial.println("Settings screen");
 		leftDisplay.clearDisplay();
 		leftDisplay.setTextSize(1);                                     
@@ -372,7 +356,7 @@ MediaKey::MediaKey(int key) : Key(key) {}
 
 void MediaKey::exe()
 {
-	if (_pressed) {
+	if (pressed) {
 		if (mediaKeySlot < 4 && keyCode != 0) {
 			keymedia_consumer_keys[mediaKeySlot++] = keyCode;
 		}
@@ -380,7 +364,7 @@ void MediaKey::exe()
 }
 
 
-void MediaKey::render(Adafruit_SSD1306 *display, int x, int y)
+void MediaKey::render(Adafruit_SSD1306 *display, int x, int y) const
 {
 	const uint8_t *bitmap = NULL;
 
