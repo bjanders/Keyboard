@@ -10,6 +10,11 @@ constexpr int MAX_KEYPRESS_LEN = 255;
 constexpr int ROWS = 4;
 constexpr int TOTAL_COLS = 12;
 constexpr int COLS_PER_HAND = 6;
+enum {
+	MOUSE_BUTTON_LEFT,
+	MOUSE_BUTTON_MIDDLE,
+	MOUSE_BUTTON_RIGHT
+};
 
 
 typedef struct {
@@ -115,6 +120,17 @@ public:
 	MediaKey(int key);
 	void exe() override;
 	void render(Adafruit_SSD1306 *display, int x, int y) const override;
+};
+
+
+class MouseKey : public Key
+{
+public:
+	MouseKey(int button);
+	void exe() override;
+	void render(Adafruit_SSD1306 *display, int x, int y) const override;
+protected:
+	int mouseButton;
 };
 
 

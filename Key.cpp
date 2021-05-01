@@ -8,6 +8,7 @@
 int mediaKeySlot;
 extern int layer;
 extern Adafruit_SSD1306 leftDisplay;
+extern byte mouse_keys[3];
 KeyList keyList;
 
 Key::Key(int mod, int key) :
@@ -70,6 +71,7 @@ void Key::setText(uint8_t mod, const char *text)
 // 20*13 pixel icons or max 3 chars (18 * 8 pixels)
 void Key::render(Adafruit_SSD1306 *display, int x, int y) const
 {
+	// FIX: Implmenent this as a table instead, with modifiers and the key for each row
 	const char *str = NULL;
 	const uint8_t *bitmap = NULL;
 
@@ -373,6 +375,37 @@ void MediaKey::render(Adafruit_SSD1306 *display, int x, int y) const
 	case KEY_MEDIA_VOLUME_DEC: bitmap = voldown; break;
 	case KEY_MEDIA_VOLUME_INC: bitmap = volup; break;
 	case KEY_MEDIA_PLAY_PAUSE: bitmap = playpause; break;
+	}
+
+	if (bitmap != NULL) {
+		display->drawBitmap(x, y, bitmap, 20, 13, WHITE);
+	}
+}
+
+MouseKey::MouseKey(int button) :
+	mouseButton{ button }
+{
+	if (mouseButton < 0 || mouseButton > 2) {
+		mouseButton = 0;
+	}
+}
+
+void MouseKey::exe()
+{
+	if (pressed) {
+		mouse_keys[mouseButton] = 1;
+	}
+
+}
+
+void MouseKey::render(Adafruit_SSD1306 *display, int x, int y) const
+{
+	const uint8_t *bitmap = NULL;
+
+	switch (mouseButton) {
+	case MOUSE_BUTTON_LEFT: bitmap = mouseleft; break;
+	case MOUSE_BUTTON_MIDDLE: bitmap = mousemiddle; break;
+	case MOUSE_BUTTON_RIGHT: bitmap = mouseright; break;
 	}
 
 	if (bitmap != NULL) {

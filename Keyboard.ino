@@ -59,14 +59,14 @@ Layer layers[LAYERS] = {
 		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new Key(RALT, KEY_Q) },
 		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new Key(RALT, KEY_P), new Key(RSHFT, 0) },
 		{ new Key(CTRL, 0),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(RCTRL, 0)},
-		{ new Key(ALT, 0),	new LayerKey(2), new LayerKey(1), new Key(GUI, 0), new Key(KEY_SPACE), new SelectLayerKey(L_SELECT), /**/ new SelectLayerKey(L_SELECT), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
+		{ new Key(ALT, 0),	new Key(GUI, 0), new LayerKey(1), new LayerKey(2), new Key(KEY_SPACE), new SelectLayerKey(L_SELECT), /**/ new SelectLayerKey(L_SELECT), new Key(ALT, 0),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0), new Key(RALT, 0) }
 	},
 	// Layer 1
 	"Windows US-Intl 1",
 	{
 		{ new DeadKey(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/ new Key(KEY_PRINTSCREEN), new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new DeadKey(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_W) },
 		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/	                      new Key(KEY_SCROLL_LOCK), new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
-		{ NULL, new Key(KEY_INSERT), new NoKey(), new Key(KEY_CAPS_LOCK), new NoKey(), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/               new Key(KEY_PAUSE), new NoKey(), new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
+		{ NULL, new Key(KEY_INSERT), new MouseKey(MOUSE_BUTTON_RIGHT), new MouseKey(MOUSE_BUTTON_MIDDLE), new MouseKey(MOUSE_BUTTON_LEFT), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/               new Key(KEY_PAUSE), new Key(KEY_CAPS_LOCK), new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
 		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/                                                                                            NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	},
 	// Layer 2
@@ -84,8 +84,8 @@ Layer layers[LAYERS] = {
 	{
 		{ new Key(KEY_TAB),	new Key(KEY_Q), new Key(KEY_W), new Key(KEY_E), new Key(KEY_R), new Key(KEY_T), /**/ new Key(KEY_Y), new Key(KEY_U), new Key(KEY_I), new Key(KEY_O), new Key(KEY_P), new UmlautKey(KEY_A) },
 		{ new Key(SHFT, 0), new Key(KEY_A), new Key(KEY_S), new Key(KEY_D), new Key(KEY_F), new Key(KEY_G), /**/ new Key(KEY_H), new Key(KEY_J), new Key(KEY_K), new Key(KEY_L), new UmlautKey(KEY_O), new Key(RSHFT, 0) },
-		{ new Key(GUI, 0, command),	new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(GUI, 0, command)},
-		{ new Key(ALT, 0, mac_opt),	new LayerKey(L_MAC + 2), new LayerKey(L_MAC + 1), new Key(CTRL, 0), new Key(KEY_SPACE), new SelectLayerKey(L_SELECT), /**/ 	 new SelectLayerKey(L_SELECT),  new NoKey(),	new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(RCTRL, 0), new Key(ALT, 0, mac_opt) }
+		{ new Key(CTRL, 0), new Key(KEY_Z), new Key(KEY_X), new Key(KEY_C), new Key(KEY_V), new Key(KEY_B), /**/ new Key(KEY_N), new Key(KEY_M), new Key(KEY_COMMA), new Key(KEY_PERIOD), new Key(KEY_SLASH), new Key(RCTRL, 0) },
+		{ new Key(ALT, 0, mac_opt),	new Key(GUI, 0, command), new LayerKey(L_MAC + 1), new LayerKey(L_MAC + 2), new Key(KEY_SPACE), new SelectLayerKey(L_SELECT), /**/ 	 new SelectLayerKey(L_SELECT),  new NoKey(), new Key(KEY_RETURN), new Key(KEY_SPACE), new Key(GUI, 0, command), new Key(ALT, 0, mac_opt) }
 	},
 	// Layer 4 (L_MAC + 1)
 	"Mac 1",
@@ -153,7 +153,10 @@ extern int keySlot;			// key slot being used 0 - 5
 extern int mediaKeySlot;		// media key slot being used 0 - 3
 int presses = 0;
 
-
+// keyboard_keys, keyboard_consumer_keys and keyboard_modifier_keys are
+// defined in usb_keyboard.h
+byte mouse_keys[3] = { 0, };
+byte old_mouse_keys[3] = { 0, };
 byte old_keyboard_keys[6] = { 0, };
 unsigned short old_keymedia_consumer_keys[4] = { 0, };
 byte old_keyboard_modifier_keys = 0;
@@ -229,6 +232,10 @@ void loop()
 		if (memcmp(keymedia_consumer_keys, old_keymedia_consumer_keys, sizeof(keymedia_consumer_keys)) != 0) {
 			usb_keymedia_send();
 			memcpy(old_keymedia_consumer_keys, keymedia_consumer_keys, sizeof(keymedia_consumer_keys));
+		}
+		if (memcmp(mouse_keys, old_mouse_keys, sizeof(mouse_keys)) != 0) {
+			Mouse.set_buttons(mouse_keys[0], mouse_keys[1], mouse_keys[2]);
+			memcpy(old_mouse_keys, mouse_keys, sizeof(mouse_keys));
 		}
 		if (layer != old_layer || keyboard_leds != old_keyboard_leds) {
 			old_layer = layer;
@@ -325,9 +332,8 @@ void scanKeys(unsigned long millisNow)
 {
 	keyList.reset();
 
-	for (int i = 0; i < 4; i++) {
-		keymedia_consumer_keys[i] = 0;
-	}
+	memset(keymedia_consumer_keys, 0, sizeof(keymedia_consumer_keys));
+	memset(mouse_keys, 0, sizeof(mouse_keys));
 	mediaKeySlot = 0;
 
 	// Left hand on Teensy
