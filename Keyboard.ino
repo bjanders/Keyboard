@@ -12,57 +12,56 @@
 
 // Configurable items
 
-constexpr unsigned long SCREENSAVER_MILLIS = 30 * 60 * 1000;
+constexpr unsigned long screensaver_millis{ 30 * 60 * 1000 }; // 30 minutes
 
-// Other constants
+// Other constnts
+constexpr auto usb_led_num_lock{ 0 };
+constexpr auto usb_led_caps_lock{ 1 };
+constexpr auto usb_led_scroll_lock{ 2 };
+constexpr auto usb_led_compose{ 3 };
+constexpr auto usb_led_kana{ 4 };
 
-constexpr auto USB_LED_NUM_LOCK = 0;
-constexpr auto USB_LED_CAPS_LOCK = 1;
-constexpr auto USB_LED_SCROLL_LOCK = 2;
-constexpr auto USB_LED_COMPOSE = 3;
-constexpr auto USB_LED_KANA = 4;
+constexpr int screen_width{ 128 }; // OLED display width, in pixels
+constexpr int screen_height{ 64 }; // OLED display height, in pixels
 
-constexpr int SCREEN_WIDTH = 128; // OLED display width, in pixels
-constexpr int SCREEN_HEIGHT = 64; // OLED display height, in pixels
-
-constexpr int OLED_DC = 14;
-constexpr int OLED_CS = 10;
-constexpr int OLED_RESET = 15;
+constexpr int oled_dc{ 14 };
+constexpr int oled_cs{ 10 };
+constexpr int oled_reset{ 15 };
 
 
-constexpr int rowPin[] = { 0, 1, 2, 3 };
-constexpr int colPin[] = { 4, 5, 6, 7, 8, 9 };
+constexpr int rowPin[]{ 0, 1, 2, 3 };
+constexpr int colPin[]{ 4, 5, 6, 7, 8, 9 };
 
 
 void initKeyMap(Layer *m, int layers);
 
-int current_keymap = 0;
+int current_keymap{ 0 };
 
-unsigned long time = 0;
-int layer = 0;			// current keyboard layer
+unsigned long time{ 0 };
+int layer{ 0 };			// current keyboard layer
 extern KeyList keyList;
 extern int keySlot;			// key slot being used 0 - 5
 extern int mediaKeySlot;		// media key slot being used 0 - 3
 extern Layer layers[LAYERS];
 
-int presses = 0;
+int presses{ 0 };
 
 // keyboard_keys, keyboard_consumer_keys and keyboard_modifier_keys are
 // defined in usb_keyboard.h
-byte mouse_keys[3] = { 0, };
-byte old_mouse_keys[3] = { 0, };
-byte old_keyboard_keys[6] = { 0, };
-unsigned short old_keymedia_consumer_keys[4] = { 0, };
-byte old_keyboard_modifier_keys = 0;
-byte old_keyboard_leds = 0;
-int old_layer = 0;
-unsigned long millisKeyPressed = 0;
+byte mouse_keys[3]{ 0, };
+byte old_mouse_keys[3]{ 0, };
+byte old_keyboard_keys[6]{ 0, };
+unsigned short old_keymedia_consumer_keys[4]{ 0, };
+byte old_keyboard_modifier_keys{ 0 };
+byte old_keyboard_leds{ 0 };
+int old_layer{ 0 };
+unsigned long millisKeyPressed{ 0 };
 bool screenSaverOn = false;
-unsigned long millisLastKeyScan = 0;
-unsigned int usb_events = 0;
+unsigned long millisLastKeyScan{ 0 };
+unsigned int usb_events{ 0 };
 
-Adafruit_SSD1306 leftDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &SPI, OLED_DC, OLED_RESET, OLED_CS);
-Adafruit_SSD1306 rightDisplay(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+Adafruit_SSD1306 leftDisplay(screen_width, screen_height, &SPI, oled_dc, oled_reset, oled_cs);
+Adafruit_SSD1306 rightDisplay(screen_width, screen_height, &Wire, -1);
 I2CDevice portExpander(MCP23017_ADDR);
 
 void setup()
@@ -138,7 +137,7 @@ void loop()
 		}
 
 	}
-	if (millisNow - millisKeyPressed > SCREENSAVER_MILLIS) {
+	if (millisNow - millisKeyPressed > screensaver_millis) {
 		clearDisplays();
 		screenSaverOn = true;
 	} else if (screenSaverOn) {
@@ -158,7 +157,7 @@ void loop()
 void printkeys()
 {
 	Serial.printf("%d %04x  ", layer, keyboard_modifier_keys);
-	for (int i = 0; i < 6; i++) {
+	for (int i{ 0 }; i < 6; ++i) {
 		Serial.printf("%02x", keyboard_keys[i]);
 		Serial.print(' ');
 	}
@@ -167,11 +166,11 @@ void printkeys()
 
 void initPins(void)
 {
-	for (int row = 0; row < ROWS; row++) {
+	for (int row{ 0 }; row < ROWS; ++row) {
 		pinMode(rowPin[row], INPUT_PULLUP);
 	}
 
-	for (int col = 0; col < COLS_PER_HAND; col++) {
+	for (int col{ 0 }; col < COLS_PER_HAND; ++col) {
 		pinMode(colPin[col], INPUT_PULLUP);
 	}
 }
@@ -211,9 +210,9 @@ void resetRightDisplay(void) {
 // current layer is set to NULL
 void initKeyMap(Layer *m, int layers)
 {
-	for (int layer = 1; layer < layers; layer++) {
-		for (int row = 0; row < ROWS; row++) {
-			for (int col = 0; col < TOTAL_COLS; col++) {
+	for (int layer{ 1 }; layer < layers; ++layer) {
+		for (int row{ 0 }; row < ROWS; ++row) {
+			for (int col{ 0 }; col < TOTAL_COLS; ++col) {
 				if (m[layer].keys[row][col] == NULL && layer > 0) {
 					m[layer].keys[row][col] = m[layer - 1].keys[row][col];
 				}
@@ -231,11 +230,11 @@ void scanKeys(unsigned long millisNow)
 	mediaKeySlot = 0;
 
 	// Left hand on Teensy
-	for (int row = 0; row < ROWS; row++) {
+	for (int row{ 0 }; row < ROWS; ++row) {
 		Key *key;
 		pinMode(rowPin[row], OUTPUT);
 		digitalWrite(rowPin[row], LOW);
-		for (int col = 0; col < COLS_PER_HAND; col++) {
+		for (int col{ 0 }; col < COLS_PER_HAND; ++col) {
 			int val;
 			bool isPressed;
 			val = digitalRead(colPin[col]);
@@ -252,7 +251,7 @@ void scanKeys(unsigned long millisNow)
 	}
 
 	// Right hand on MCP23017
-	for (int row = 0; row < ROWS; row++) {
+	for (int row{ 0 }; row < ROWS; ++row) {
 		Key *key;
 		int colStat;
 		// Set row to output
@@ -269,7 +268,7 @@ void scanKeys(unsigned long millisNow)
 		//Serial.print(' ');
 		//Serial.println(colStat, BIN);
 
-		for (int col = 0; col < COLS_PER_HAND; col++) {
+		for (int col{ 0 }; col < COLS_PER_HAND; ++col) {
 			bool isPressed;
 			key = layers[layer].keys[row][col+COLS_PER_HAND];
 			if (key == NULL) continue;
@@ -321,8 +320,8 @@ void renderLeftDisplay(void) {
 	if (layer != L_SELECT) {
 		Key *key;
 		leftDisplay.fillRect(0, 8, 128, 64 - 8, BLACK);
-		for (int row = 0; row < 4; row++) {
-			for (int col = 0; col < 6; col++) {
+		for (int row{ 0 }; row < 4; ++row) {
+			for (int col{ 0 }; col < 6; ++col) {
 				key = layers[layer].keys[row][col];
 				key->render(&leftDisplay, col * 21, 9 + row * 14);
 			}
@@ -335,18 +334,18 @@ void renderLeftDisplay(void) {
 }
 
 void renderRightDisplay(void) {
-	const char *num = "";
-	const char *caps = "";
-	const char *scroll = "";
+	const char *num{ "" };
+	const char *caps{ "" };
+	const char *scroll{ "" };
 
 	rightDisplay.clearDisplay();
-	if (keyboard_leds & (1 << USB_LED_NUM_LOCK)) {
+	if (keyboard_leds & (1 << usb_led_num_lock)) {
 		num = "NUM";
 	}
-	if (keyboard_leds & (1 << USB_LED_CAPS_LOCK)) {
+	if (keyboard_leds & (1 << usb_led_caps_lock)) {
 		caps = "CAPS";
 	}
-	if (keyboard_leds & (1 << USB_LED_SCROLL_LOCK)) {
+	if (keyboard_leds & (1 << usb_led_scroll_lock)) {
 		scroll = "SCROLL";
 	}
 	rightDisplay.setTextSize(1);
@@ -356,8 +355,8 @@ void renderRightDisplay(void) {
 	if (layer != L_SELECT) {
 		Key *key;
 		rightDisplay.fillRect(0, 8, 128, 64 - 8, BLACK);
-		for (int row = 0; row < 4; row++) {
-			for (int col = 6; col < 12; col++) {
+		for (int row{ 0 }; row < 4; ++row) {
+			for (int col{ 6 }; col < 12; ++col) {
 				key = layers[layer].keys[row][col];
 				key->render(&rightDisplay, (col - 6) * 21 + 3, 9 + row * 14);
 			}

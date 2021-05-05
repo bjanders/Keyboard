@@ -11,10 +11,11 @@
 #define GUI MODIFIERKEY_GUI
 #define RGUI MODIFIERKEY_RIGHT_GUI
 
-constexpr int L_WIN = 0;
-constexpr int L_MAC = 3;
-constexpr int L_GAMING = 6;
-constexpr int L_PHOTOSHOP = 7;
+constexpr int L_WIN{ 0 };
+constexpr int L_MAC{ 3 };
+constexpr int L_GAMING{ 6 };
+constexpr int L_PHOTOSHOP{ 7 };
+
 
 Layer layers[LAYERS] = {
 	// Layer 0
@@ -56,7 +57,7 @@ Layer layers[LAYERS] = {
 	{
 		{ new Key(SHFT, KEY_TILDE), new Key(KEY_DELETE), new Key(KEY_HOME), new Key(KEY_UP), new Key(KEY_END), new Key(KEY_PAGE_UP), /**/             new NoKey(), new Key(KEY_LEFT_BRACE), new Key(KEY_RIGHT_BRACE), new Key(KEY_QUOTE), new Key(SHFT, KEY_EQUAL), new Key(RALT, KEY_A) },
 		{ NULL,	new Key(KEY_ESC),new Key(KEY_LEFT),	new Key(KEY_DOWN), new Key(KEY_RIGHT), new Key(KEY_PAGE_DOWN), /**/                               new NoKey(), new Key(SHFT, KEY_9), new Key(SHFT, KEY_0), new Key(KEY_MINUS), new Key(KEY_EQUAL), NULL },
-		{ NULL, new Key(KEY_INSERT), new NoKey(), new NoKey(), new NoKey(), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/ new NoKey(), new NoKey(), new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
+		{ NULL, new Key(KEY_INSERT), new MouseKey(MOUSE_BUTTON_RIGHT), new MouseKey(MOUSE_BUTTON_MIDDLE), new MouseKey(MOUSE_BUTTON_LEFT), new MediaKey(KEY_MEDIA_PLAY_PAUSE), /**/ new NoKey(), new NoKey(), new Key(KEY_SEMICOLON), new Key(SHFT, KEY_SEMICOLON), new Key(KEY_BACKSLASH), NULL},
 		{ NULL,	NULL, NULL,	NULL, NULL,	NULL, /**/                                                                                                    NULL, NULL, NULL, new Key(KEY_BACKSPACE), NULL, NULL },
 	},
 	// Layer 5 (L_MAC + 2)

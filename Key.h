@@ -60,8 +60,8 @@ public:
 	void exe();
 };
 
-// UmlautKey is for MacOS to generate an umlaut, i.e.
-// adds two dots above the key. This is adding
+// UmlautKey is for MacOS to generate an umlaut, i.e.,
+// adds two dots above the character. This is done by sending
 // command + u before the actual key.
 class UmlautKey : public Key
 {
@@ -71,7 +71,11 @@ public:
 };
 
 // ShiftedDeadKey is like DeadKey, but will only add a space after
-// the key is pressed if shift is also pressed. 
+// the key is pressed if shift is also pressed. The purpose of this is,
+// for example, when you want to press the key '6', and you there is a dead
+// key when you press Shift-6. This is the case for the US Interntional layout.
+// So normally you would only send '6', but when pressing Shift-6, you need to
+// send a space after it.
 class ShiftedDeadKey : public Key
 {
 	using Key::Key;
