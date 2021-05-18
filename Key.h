@@ -5,11 +5,12 @@
 #include <Adafruit_SSD1306.h>
 
 
-constexpr int MAX_KEYPRESS_LEN = 255;
+constexpr int default_mouse_speed{ 2 };
+constexpr int MAX_KEYPRESS_LEN{ 255 };
 
-constexpr int ROWS = 4;
-constexpr int TOTAL_COLS = 12;
-constexpr int COLS_PER_HAND = 6;
+constexpr int ROWS{ 4 };
+constexpr int TOTAL_COLS{ 12 };
+constexpr int COLS_PER_HAND{ 6 };
 enum {
 	MOUSE_BUTTON_LEFT,
 	MOUSE_BUTTON_MIDDLE,
@@ -127,14 +128,53 @@ public:
 };
 
 
-class MouseKey : public Key
+class MouseButton : public Key
 {
 public:
-	MouseKey(int button);
+	MouseButton(int button);
 	void exe() override;
 	void render(Adafruit_SSD1306 *display, int x, int y) const override;
 protected:
 	int mouseButton;
+	const uint8_t *bitmap;
+};
+
+enum class MouseDir { N, NE, E, SE, S, SW, W, NW };
+
+class MouseMove : public Key
+{
+public:
+	static int speed;
+	MouseMove(MouseDir dir);
+	void exe() override;
+	void render(Adafruit_SSD1306 *display, int x, int y) const override;
+protected:
+	int x;
+	int y;
+	const uint8_t* bitmap;
+};
+
+class MouseSpeed : public Key
+{
+public:
+	MouseSpeed(int speed);
+	void exe() override;
+protected:
+	int speed;
+	int old_speed;
+};
+
+class MouseScroll : public Key
+{
+public:
+	MouseScroll(int steps, unsigned int scroll_interval);
+	void exe() override;
+	void render(Adafruit_SSD1306 *display, int x, int y) const override;
+protected:
+	int steps;
+	unsigned long scroll_time;
+	unsigned int scroll_interval;
+	const uint8_t* bitmap;
 };
 
 

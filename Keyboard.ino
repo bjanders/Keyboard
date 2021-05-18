@@ -59,6 +59,7 @@ unsigned long millisKeyPressed{ 0 };
 bool screenSaverOn = false;
 unsigned long millisLastKeyScan{ 0 };
 unsigned int usb_events{ 0 };
+int MouseMove::speed = default_mouse_speed;
 
 Adafruit_SSD1306 leftDisplay(screen_width, screen_height, &SPI, oled_dc, oled_reset, oled_cs);
 Adafruit_SSD1306 rightDisplay(screen_width, screen_height, &Wire, -1);

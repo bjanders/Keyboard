@@ -382,15 +382,21 @@ void MediaKey::render(Adafruit_SSD1306 *display, int x, int y) const
 	}
 }
 
-MouseKey::MouseKey(int button) :
+MouseButton::MouseButton(int button) :
 	mouseButton{ button }
 {
 	if (mouseButton < 0 || mouseButton > 2) {
 		mouseButton = 0;
 	}
+
+	switch (mouseButton) {
+	case MOUSE_BUTTON_LEFT: bitmap = mouseleft; break;
+	case MOUSE_BUTTON_MIDDLE: bitmap = mousemiddle; break;
+	case MOUSE_BUTTON_RIGHT: bitmap = mouseright; break;
+	}
 }
 
-void MouseKey::exe()
+void MouseButton::exe()
 {
 	if (pressed) {
 		mouse_keys[mouseButton] = 1;
@@ -398,20 +404,113 @@ void MouseKey::exe()
 
 }
 
-void MouseKey::render(Adafruit_SSD1306 *display, int x, int y) const
+void MouseButton::render(Adafruit_SSD1306 *display, int x, int y) const
 {
-	const uint8_t *bitmap = NULL;
-
-	switch (mouseButton) {
-	case MOUSE_BUTTON_LEFT: bitmap = mouseleft; break;
-	case MOUSE_BUTTON_MIDDLE: bitmap = mousemiddle; break;
-	case MOUSE_BUTTON_RIGHT: bitmap = mouseright; break;
-	}
-
 	if (bitmap != NULL) {
 		display->drawBitmap(x, y, bitmap, 20, 13, WHITE);
 	}
 }
+
+
+MouseMove::MouseMove(MouseDir dir)
+{
+	switch (dir) {
+	case MouseDir::N:
+		x = 0;
+		y = -1;
+		bitmap = mouse_n;
+		break;
+	case MouseDir::NE:
+		x = 1;
+		y = -1;
+		bitmap = mouse_ne;
+		break;
+	case MouseDir::E:
+		x = 1;
+		y = 0;
+		bitmap = mouse_e;
+		break;
+	case MouseDir::SE:
+		x = 1;
+		y = 1;
+		bitmap = mouse_se;
+		break;
+	case MouseDir::S:
+		x = 0;
+		y = 1;
+		bitmap = mouse_s;
+		break;
+	case MouseDir::SW:
+		x = -1;
+		y = 1;
+		bitmap = mouse_sw;
+		break;
+	case MouseDir::W:
+		x = -1;
+		y = 0;
+		bitmap = mouse_w;
+		break;
+	case MouseDir::NW:
+		x = -1;
+		y = -1;
+		bitmap = mouse_nw;
+		break;
+	}
+}
+
+void MouseMove::exe()
+{
+	if (pressed) {
+		Mouse.move(MouseMove::speed * x, MouseMove::speed * y);
+	}
+}
+
+void MouseMove::render(Adafruit_SSD1306 *display, int x, int y) const
+{
+	display->drawBitmap(x, y, bitmap, 20, 13, WHITE);
+}
+
+MouseSpeed::MouseSpeed(int speed) : speed{ speed } {}
+
+void MouseSpeed::exe()
+{
+	if (modified)
+	{
+		if (pressed) {
+			old_speed = MouseMove::speed;
+			MouseMove::speed = speed;
+		} else {
+			MouseMove::speed = default_mouse_speed;
+		}
+	}
+}
+
+MouseScroll::MouseScroll(int steps, unsigned int scroll_interval) : 
+	steps{ steps },
+	scroll_interval{ scroll_interval }
+{
+	if (steps > 0) {
+		bitmap = mouse_scroll_up;
+	} else {
+		bitmap = mouse_scroll_down;
+	}
+}
+
+void MouseScroll::exe()
+{
+	unsigned long millis_now{ millis() };
+	if (pressed && millis_now - scroll_time > scroll_interval) {
+		Mouse.scroll(steps);
+		scroll_time = millis_now;
+	}
+}
+
+
+void MouseScroll::render(Adafruit_SSD1306 *display, int x, int y) const
+{
+	display->drawBitmap(x, y, bitmap, 20, 13, WHITE);
+}
+
 
 KeyList::KeyList()
 {
